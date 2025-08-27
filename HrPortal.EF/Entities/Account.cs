@@ -1,0 +1,37 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace HrPortal.EF.Entities;
+
+public partial class Account
+{
+    public Guid AccountId { get; set; }
+
+    public Guid PersonId { get; set; }
+
+    public string? UserName { get; set; }
+
+    public string AuthType { get; set; } = null!;
+
+    public string? AuthSubject { get; set; }
+
+    public string? PasswordHash { get; set; }
+
+    public byte Status { get; set; }
+
+    public bool IsDeleted { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public byte[] RowVer { get; set; } = null!;
+
+    public virtual ICollection<AppUserRole> AppUserRoles { get; set; } = new List<AppUserRole>();
+
+    public virtual Employment? Employment { get; set; }
+
+    public virtual ICollection<ExternalAccountLink> ExternalAccountLinks { get; set; } = new List<ExternalAccountLink>();
+
+    public virtual Person Person { get; set; } = null!;
+}

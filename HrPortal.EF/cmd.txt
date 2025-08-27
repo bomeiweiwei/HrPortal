@@ -1,0 +1,1 @@
+﻿dotnet ef dbcontext scaffold "Server=localhost;Database=;User Id=;password=;Trusted_Connection=False;MultipleActiveResultSets=true;TrustServerCertificate=true" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --context-dir Data --no-onconfiguring --force
