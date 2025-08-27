@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HrPortal.EF\HrPortal.EF.csproj" />
+    <ProjectReference Include="..\HrPortal.Models\HrPortal.Models.csproj" />
+    <ProjectReference Include="..\HrPortal.Shared\HrPortal.Shared.csproj" />
+  </ItemGroup>
+</Project>
