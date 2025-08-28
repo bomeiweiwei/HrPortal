@@ -1,0 +1,7 @@
+﻿docker run -d --name hrportal-web-prod \
+  --network mssql-net \
+  -p 8081:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e ConnectionStrings__MasterConnection="Server=sqlserver,1433;Database=;User Id=;Password=;Encrypt=True;TrustServerCertificate=True;" \
+  -e ConnectionStrings__SlaveConnection="Server=sqlserver,1433;Database=;User Id=;Password=;Encrypt=True;TrustServerCertificate=True;" \
+  hrportal-web:1.0
