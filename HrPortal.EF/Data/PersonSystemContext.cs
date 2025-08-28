@@ -38,11 +38,9 @@ public partial class PersonSystemContext : DbContext
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Account__349DA5A6403FFE45");
-
             entity.ToTable("Account");
 
-            entity.HasIndex(e => new { e.AuthType, e.AuthSubject }, "UX_Account_Auth")
+            entity.HasIndex(e => new { e.AuthType, e.AuthSubject }, "UX_Account_AuthType_Subject")
                 .IsUnique()
                 .HasFilter("([AuthSubject] IS NOT NULL)");
 
@@ -54,26 +52,28 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.AuthSubject).HasMaxLength(256);
             entity.Property(e => e.AuthType).HasMaxLength(32);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.PasswordHash).HasMaxLength(512);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
             entity.Property(e => e.UserName).HasMaxLength(100);
 
             entity.HasOne(d => d.Person).WithMany(p => p.Accounts)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Account__PersonI__3E52440B");
+                .HasConstraintName("FK_Account_Person");
         });
 
         modelBuilder.Entity<AppPermission>(entity =>
         {
-            entity.HasKey(e => e.PermissionId).HasName("PK__AppPermi__EFA6FB2F50DA0C19");
+            entity.HasKey(e => e.PermissionId);
 
             entity.ToTable("AppPermission");
 
-            entity.HasIndex(e => e.Code, "UQ__AppPermi__A25C5AA72FEC5AC0").IsUnique();
+            entity.HasIndex(e => e.Code, "UX_AppPermission_Code").IsUnique();
 
             entity.Property(e => e.PermissionId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(80);
@@ -83,14 +83,15 @@ public partial class PersonSystemContext : DbContext
 
         modelBuilder.Entity<AppRole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__AppRole__8AFACE1A64811567");
+            entity.HasKey(e => e.RoleId);
 
             entity.ToTable("AppRole");
 
-            entity.HasIndex(e => e.Code, "UQ__AppRole__A25C5AA752406302").IsUnique();
+            entity.HasIndex(e => e.Code, "UX_AppRole_Code").IsUnique();
 
             entity.Property(e => e.RoleId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(100);
@@ -101,11 +102,11 @@ public partial class PersonSystemContext : DbContext
                     r => r.HasOne<AppPermission>().WithMany()
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__AppRolePe__Permi__7F2BE32F"),
+                        .HasConstraintName("FK_ARP_Permission"),
                     l => l.HasOne<AppRole>().WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__AppRolePe__RoleI__7E37BEF6"),
+                        .HasConstraintName("FK_ARP_Role"),
                     j =>
                     {
                         j.HasKey("RoleId", "PermissionId");
@@ -115,41 +116,40 @@ public partial class PersonSystemContext : DbContext
 
         modelBuilder.Entity<AppUserRole>(entity =>
         {
-            entity.HasKey(e => e.AppUserRoleId).HasName("PK__AppUserR__BD9D3D2906348351");
-
             entity.ToTable("AppUserRole");
 
-            entity.HasIndex(e => new { e.AccountId, e.RoleId, e.OuId }, "UX_AppUserRole_Unique").IsUnique();
+            entity.HasIndex(e => new { e.AccountId, e.RoleId, e.OuId }, "UX_AppUserRole_Account_Role_Ou").IsUnique();
 
             entity.Property(e => e.AppUserRoleId).HasDefaultValueSql("(newsequentialid())");
 
             entity.HasOne(d => d.Account).WithMany(p => p.AppUserRoles)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__AppUserRo__Accou__797309D9");
+                .HasConstraintName("FK_AppUserRole_Account");
 
             entity.HasOne(d => d.Ou).WithMany(p => p.AppUserRoles)
                 .HasForeignKey(d => d.OuId)
-                .HasConstraintName("FK__AppUserRol__OuId__7B5B524B");
+                .HasConstraintName("FK_AppUserRole_OU");
 
             entity.HasOne(d => d.Role).WithMany(p => p.AppUserRoles)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__AppUserRo__RoleI__7A672E12");
+                .HasConstraintName("FK_AppUserRole_Role");
         });
 
         modelBuilder.Entity<Employment>(entity =>
         {
-            entity.HasKey(e => e.EmploymentId).HasName("PK__Employme__FDC872B67E7F8551");
-
             entity.ToTable("Employment");
+
+            entity.HasIndex(e => e.OuId, "IX_Employment_OU");
 
             entity.HasIndex(e => e.AccountId, "UX_Employment_Primary")
                 .IsUnique()
-                .HasFilter("([IsPrimary]=(1))");
+                .HasFilter("([IsPrimary]=(1) AND [EndDate] IS NULL)");
 
             entity.Property(e => e.EmploymentId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.EmployeeNo).HasMaxLength(50);
             entity.Property(e => e.EmploymentType)
                 .HasMaxLength(20)
@@ -157,29 +157,30 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
 
             entity.HasOne(d => d.Account).WithOne(p => p.Employment)
                 .HasForeignKey<Employment>(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Employmen__Accou__5165187F");
+                .HasConstraintName("FK_Employment_Account");
 
             entity.HasOne(d => d.Ou).WithMany(p => p.Employments)
                 .HasForeignKey(d => d.OuId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Employment__OuId__52593CB8");
+                .HasConstraintName("FK_Employment_OU");
 
             entity.HasOne(d => d.Position).WithMany(p => p.Employments)
                 .HasForeignKey(d => d.PositionId)
-                .HasConstraintName("FK__Employmen__Posit__534D60F1");
+                .HasConstraintName("FK_Employment_Position");
         });
 
         modelBuilder.Entity<ExternalAccountLink>(entity =>
         {
-            entity.HasKey(e => e.LinkId).HasName("PK__External__2D1221357A65A19B");
+            entity.HasKey(e => e.LinkId);
 
             entity.ToTable("ExternalAccountLink");
 
-            entity.HasIndex(e => new { e.SystemId, e.ExternalUserId }, "UX_ExternalLink").IsUnique();
+            entity.HasIndex(e => new { e.SystemId, e.ExternalUserId }, "UX_EAL_System_ExternalUser").IsUnique();
 
             entity.Property(e => e.LinkId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -194,17 +195,17 @@ public partial class PersonSystemContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.ExternalAccountLinks)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ExternalA__Accou__5EBF139D");
+                .HasConstraintName("FK_EAL_Account");
 
             entity.HasOne(d => d.System).WithMany(p => p.ExternalAccountLinks)
                 .HasForeignKey(d => d.SystemId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ExternalA__Syste__5FB337D6");
+                .HasConstraintName("FK_EAL_System");
         });
 
         modelBuilder.Entity<ExternalSystem>(entity =>
         {
-            entity.HasKey(e => e.SystemId).HasName("PK__External__9394F68A22B2DC61");
+            entity.HasKey(e => e.SystemId);
 
             entity.ToTable("ExternalSystem");
 
@@ -221,7 +222,7 @@ public partial class PersonSystemContext : DbContext
 
         modelBuilder.Entity<OrganizationUnit>(entity =>
         {
-            entity.HasKey(e => e.OuId).HasName("PK__Organiza__FC76A228D6EF9B4D");
+            entity.HasKey(e => e.OuId);
 
             entity.ToTable("OrganizationUnit");
 
@@ -230,35 +231,35 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.OuId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.Type).HasMaxLength(30);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
         });
 
         modelBuilder.Entity<OrganizationUnitClosure>(entity =>
         {
-            entity.HasKey(e => new { e.AncestorOuId, e.DescendantOuId }).HasName("PK_OU_Closure");
+            entity.HasKey(e => new { e.AncestorOuId, e.DescendantOuId });
 
             entity.ToTable("OrganizationUnitClosure");
 
             entity.HasOne(d => d.AncestorOu).WithMany(p => p.OrganizationUnitClosureAncestorOus)
                 .HasForeignKey(d => d.AncestorOuId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Organizat__Ances__49C3F6B7");
+                .HasConstraintName("FK_OUC_Ancestor");
 
             entity.HasOne(d => d.DescendantOu).WithMany(p => p.OrganizationUnitClosureDescendantOus)
                 .HasForeignKey(d => d.DescendantOuId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Organizat__Desce__4AB81AF0");
+                .HasConstraintName("FK_OUC_Descendant");
         });
 
         modelBuilder.Entity<Person>(entity =>
         {
-            entity.HasKey(e => e.PersonId).HasName("PK__Person__AA2FFBE51B715D32");
-
             entity.ToTable("Person");
 
             entity.HasIndex(e => e.Email, "UX_Person_Email")
@@ -280,8 +281,6 @@ public partial class PersonSystemContext : DbContext
 
         modelBuilder.Entity<Position>(entity =>
         {
-            entity.HasKey(e => e.PositionId).HasName("PK__Position__60BB9A7931A445FF");
-
             entity.ToTable("Position");
 
             entity.HasIndex(e => e.Code, "UX_Position_Code").IsUnique();
