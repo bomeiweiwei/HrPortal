@@ -42,17 +42,23 @@ public partial class PersonSystemContext : DbContext
 
             entity.ToTable("Account");
 
-            entity.HasIndex(e => new { e.AuthType, e.AuthSubject }, "UX_Account_Auth").IsUnique();
+            entity.HasIndex(e => new { e.AuthType, e.AuthSubject }, "UX_Account_Auth")
+                .IsUnique()
+                .HasFilter("([AuthSubject] IS NOT NULL)");
 
-            entity.HasIndex(e => e.UserName, "UX_Account_UserName").IsUnique();
+            entity.HasIndex(e => e.UserName, "UX_Account_UserName")
+                .IsUnique()
+                .HasFilter("([UserName] IS NOT NULL)");
 
-            entity.Property(e => e.AccountId).ValueGeneratedNever();
+            entity.Property(e => e.AccountId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.AuthSubject).HasMaxLength(256);
             entity.Property(e => e.AuthType).HasMaxLength(32);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.PasswordHash).HasMaxLength(512);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
             entity.Property(e => e.UserName).HasMaxLength(100);
 
             entity.HasOne(d => d.Person).WithMany(p => p.Accounts)
@@ -69,7 +75,7 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => e.Code, "UQ__AppPermi__A25C5AA72FEC5AC0").IsUnique();
 
-            entity.Property(e => e.PermissionId).ValueGeneratedNever();
+            entity.Property(e => e.PermissionId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(80);
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(100);
@@ -83,9 +89,10 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => e.Code, "UQ__AppRole__A25C5AA752406302").IsUnique();
 
-            entity.Property(e => e.RoleId).ValueGeneratedNever();
+            entity.Property(e => e.RoleId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(200);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(100);
 
             entity.HasMany(d => d.Permissions).WithMany(p => p.Roles)
@@ -114,7 +121,7 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => new { e.AccountId, e.RoleId, e.OuId }, "UX_AppUserRole_Unique").IsUnique();
 
-            entity.Property(e => e.AppUserRoleId).ValueGeneratedNever();
+            entity.Property(e => e.AppUserRoleId).HasDefaultValueSql("(newsequentialid())");
 
             entity.HasOne(d => d.Account).WithMany(p => p.AppUserRoles)
                 .HasForeignKey(d => d.AccountId)
@@ -137,11 +144,16 @@ public partial class PersonSystemContext : DbContext
 
             entity.ToTable("Employment");
 
-            entity.HasIndex(e => e.AccountId, "UX_Employment_Primary").IsUnique();
+            entity.HasIndex(e => e.AccountId, "UX_Employment_Primary")
+                .IsUnique()
+                .HasFilter("([IsPrimary]=(1))");
 
-            entity.Property(e => e.EmploymentId).ValueGeneratedNever();
+            entity.Property(e => e.EmploymentId).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.EmployeeNo).HasMaxLength(50);
-            entity.Property(e => e.EmploymentType).HasMaxLength(20);
+            entity.Property(e => e.EmploymentType)
+                .HasMaxLength(20)
+                .HasDefaultValue("FullTime");
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
@@ -169,7 +181,8 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => new { e.SystemId, e.ExternalUserId }, "UX_ExternalLink").IsUnique();
 
-            entity.Property(e => e.LinkId).ValueGeneratedNever();
+            entity.Property(e => e.LinkId).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.ExternalRoleKey).HasMaxLength(128);
             entity.Property(e => e.ExternalUserId).HasMaxLength(128);
             entity.Property(e => e.ExternalUserName).HasMaxLength(128);
@@ -197,10 +210,12 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => e.Code, "UX_ExternalSystem_Code").IsUnique();
 
-            entity.Property(e => e.SystemId).ValueGeneratedNever();
+            entity.Property(e => e.SystemId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.AuthType).HasMaxLength(30);
             entity.Property(e => e.BaseUrl).HasMaxLength(500);
             entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
         });
 
@@ -212,8 +227,10 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => e.Code, "UX_OU_Code").IsUnique();
 
-            entity.Property(e => e.OuId).ValueGeneratedNever();
+            entity.Property(e => e.OuId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
@@ -244,12 +261,16 @@ public partial class PersonSystemContext : DbContext
 
             entity.ToTable("Person");
 
-            entity.HasIndex(e => e.Email, "UX_Person_Email").IsUnique();
+            entity.HasIndex(e => e.Email, "UX_Person_Email")
+                .IsUnique()
+                .HasFilter("([Email] IS NOT NULL)");
 
-            entity.Property(e => e.PersonId).ValueGeneratedNever();
+            entity.Property(e => e.PersonId).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.Email).HasMaxLength(256);
             entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Mobile).HasMaxLength(32);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
@@ -265,7 +286,7 @@ public partial class PersonSystemContext : DbContext
 
             entity.HasIndex(e => e.Code, "UX_Position_Code").IsUnique();
 
-            entity.Property(e => e.PositionId).ValueGeneratedNever();
+            entity.Property(e => e.PositionId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(100);
