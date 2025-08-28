@@ -22,9 +22,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Note\" />
+    <None Remove="SeedData\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Note\" />
+    <Folder Include="SeedData\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">

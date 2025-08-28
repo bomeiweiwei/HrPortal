@@ -13,5 +13,13 @@ public partial class AppPermission
 
     public string? Description { get; set; }
 
-    public virtual ICollection<AppRole> Roles { get; set; } = new List<AppRole>();
+    public DateTime CreatedAt { get; set; }
+
+    public int? CreatedBy { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public int? UpdatedBy { get; set; }
+
+    public virtual ICollection<AppRolePermission> AppRolePermissions { get; set; } = new List<AppRolePermission>();
 }

@@ -18,6 +18,8 @@ public partial class PersonSystemContext : DbContext
 
     public virtual DbSet<AppRole> AppRoles { get; set; }
 
+    public virtual DbSet<AppRolePermission> AppRolePermissions { get; set; }
+
     public virtual DbSet<AppUserRole> AppUserRoles { get; set; }
 
     public virtual DbSet<Employment> Employments { get; set; }
@@ -52,13 +54,11 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.AuthSubject).HasMaxLength(256);
             entity.Property(e => e.AuthType).HasMaxLength(32);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.PasswordHash).HasMaxLength(512);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.Status).HasDefaultValue((byte)1);
-            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
             entity.Property(e => e.UserName).HasMaxLength(100);
 
             entity.HasOne(d => d.Person).WithMany(p => p.Accounts)
@@ -77,6 +77,7 @@ public partial class PersonSystemContext : DbContext
 
             entity.Property(e => e.PermissionId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(80);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(100);
         });
@@ -95,23 +96,25 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(100);
+        });
 
-            entity.HasMany(d => d.Permissions).WithMany(p => p.Roles)
-                .UsingEntity<Dictionary<string, object>>(
-                    "AppRolePermission",
-                    r => r.HasOne<AppPermission>().WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_ARP_Permission"),
-                    l => l.HasOne<AppRole>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_ARP_Role"),
-                    j =>
-                    {
-                        j.HasKey("RoleId", "PermissionId");
-                        j.ToTable("AppRolePermission");
-                    });
+        modelBuilder.Entity<AppRolePermission>(entity =>
+        {
+            entity.HasKey(e => new { e.RoleId, e.PermissionId });
+
+            entity.ToTable("AppRolePermission");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+
+            entity.HasOne(d => d.Permission).WithMany(p => p.AppRolePermissions)
+                .HasForeignKey(d => d.PermissionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ARP_Permission");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.AppRolePermissions)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ARP_Role");
         });
 
         modelBuilder.Entity<AppUserRole>(entity =>
@@ -121,6 +124,7 @@ public partial class PersonSystemContext : DbContext
             entity.HasIndex(e => new { e.AccountId, e.RoleId, e.OuId }, "UX_AppUserRole_Account_Role_Ou").IsUnique();
 
             entity.Property(e => e.AppUserRoleId).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
 
             entity.HasOne(d => d.Account).WithMany(p => p.AppUserRoles)
                 .HasForeignKey(d => d.AccountId)
@@ -141,15 +145,12 @@ public partial class PersonSystemContext : DbContext
         {
             entity.ToTable("Employment");
 
-            entity.HasIndex(e => e.OuId, "IX_Employment_OU");
-
             entity.HasIndex(e => e.AccountId, "UX_Employment_Primary")
                 .IsUnique()
                 .HasFilter("([IsPrimary]=(1) AND [EndDate] IS NULL)");
 
             entity.Property(e => e.EmploymentId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.EmployeeNo).HasMaxLength(50);
             entity.Property(e => e.EmploymentType)
                 .HasMaxLength(20)
@@ -157,7 +158,6 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
 
             entity.HasOne(d => d.Account).WithOne(p => p.Employment)
                 .HasForeignKey<Employment>(d => d.AccountId)
@@ -231,14 +231,12 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.OuId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.Type).HasMaxLength(30);
-            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
         });
 
         modelBuilder.Entity<OrganizationUnitClosure>(entity =>
@@ -246,6 +244,8 @@ public partial class PersonSystemContext : DbContext
             entity.HasKey(e => new { e.AncestorOuId, e.DescendantOuId });
 
             entity.ToTable("OrganizationUnitClosure");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
 
             entity.HasOne(d => d.AncestorOu).WithMany(p => p.OrganizationUnitClosureAncestorOus)
                 .HasForeignKey(d => d.AncestorOuId)
@@ -268,7 +268,6 @@ public partial class PersonSystemContext : DbContext
 
             entity.Property(e => e.PersonId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.CreatedBy).HasMaxLength(64);
             entity.Property(e => e.Email).HasMaxLength(256);
             entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
@@ -276,7 +275,6 @@ public partial class PersonSystemContext : DbContext
             entity.Property(e => e.RowVer)
                 .IsRowVersion()
                 .IsConcurrencyToken();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(64);
         });
 
         modelBuilder.Entity<Position>(entity =>
@@ -287,6 +285,7 @@ public partial class PersonSystemContext : DbContext
 
             entity.Property(e => e.PositionId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(100);
         });
