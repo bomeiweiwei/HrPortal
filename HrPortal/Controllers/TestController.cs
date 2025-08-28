@@ -21,6 +21,13 @@ namespace HrPortal.Web.Controllers
             _testService = testService;
         }
         [HttpGet]
+        [Route("GetEnv")]
+        public async Task<IActionResult> GetEnv()
+        {
+            var environment = _env.EnvironmentName;
+            return Ok(new { environment });
+        }
+        [HttpGet]
         [Route("GetConnectResult")]
         public async Task<IActionResult> GetConnectResult()
         {
