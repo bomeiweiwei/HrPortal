@@ -15,11 +15,9 @@ public partial class Position
 
     public DateTime CreatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? UpdatedBy { get; set; }
-
-    public virtual ICollection<Employment> Employments { get; set; } = new List<Employment>();
+    public Guid? UpdatedBy { get; set; }
 }

@@ -19,19 +19,11 @@ public partial class OrganizationUnit
 
     public DateTime CreatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
 
     public byte[] RowVer { get; set; } = null!;
-
-    public virtual ICollection<AppUserRole> AppUserRoles { get; set; } = new List<AppUserRole>();
-
-    public virtual ICollection<Employment> Employments { get; set; } = new List<Employment>();
-
-    public virtual ICollection<OrganizationUnitClosure> OrganizationUnitClosureAncestorOus { get; set; } = new List<OrganizationUnitClosure>();
-
-    public virtual ICollection<OrganizationUnitClosure> OrganizationUnitClosureDescendantOus { get; set; } = new List<OrganizationUnitClosure>();
 }

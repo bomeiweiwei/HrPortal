@@ -7,7 +7,7 @@ public partial class Account
 {
     public Guid AccountId { get; set; }
 
-    public Guid PersonId { get; set; }
+    public Guid? PersonId { get; set; }
 
     public string? UserName { get; set; }
 
@@ -23,19 +23,11 @@ public partial class Account
 
     public DateTime CreatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
 
     public byte[] RowVer { get; set; } = null!;
-
-    public virtual ICollection<AppUserRole> AppUserRoles { get; set; } = new List<AppUserRole>();
-
-    public virtual Employment? Employment { get; set; }
-
-    public virtual ICollection<ExternalAccountLink> ExternalAccountLinks { get; set; } = new List<ExternalAccountLink>();
-
-    public virtual Person Person { get; set; } = null!;
 }

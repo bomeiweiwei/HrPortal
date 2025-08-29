@@ -7,9 +7,9 @@ public partial class Employment
 {
     public Guid EmploymentId { get; set; }
 
-    public Guid AccountId { get; set; }
+    public Guid? AccountId { get; set; }
 
-    public Guid OuId { get; set; }
+    public Guid? OuId { get; set; }
 
     public Guid? PositionId { get; set; }
 
@@ -19,23 +19,17 @@ public partial class Employment
 
     public bool IsPrimary { get; set; }
 
-    public DateOnly StartDate { get; set; }
+    public DateTime StartDate { get; set; }
 
-    public DateOnly? EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
 
     public byte[] RowVer { get; set; } = null!;
-
-    public virtual Account Account { get; set; } = null!;
-
-    public virtual OrganizationUnit Ou { get; set; } = null!;
-
-    public virtual Position? Position { get; set; }
 }

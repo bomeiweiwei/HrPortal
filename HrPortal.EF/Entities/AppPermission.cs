@@ -15,11 +15,9 @@ public partial class AppPermission
 
     public DateTime CreatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? UpdatedBy { get; set; }
-
-    public virtual ICollection<AppRolePermission> AppRolePermissions { get; set; } = new List<AppRolePermission>();
+    public Guid? UpdatedBy { get; set; }
 }
