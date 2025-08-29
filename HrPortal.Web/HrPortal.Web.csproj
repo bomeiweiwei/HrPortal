@@ -23,15 +23,21 @@
   <ItemGroup>
     <None Remove="Note\" />
     <None Remove="SeedData\" />
+    <None Remove="Views\OrganizationUnits\" />
+    <None Remove="Views\Identity\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Note\" />
     <Folder Include="SeedData\" />
+    <Folder Include="Views\OrganizationUnits\" />
+    <Folder Include="Views\Identity\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
   </ItemGroup>
 </Project>

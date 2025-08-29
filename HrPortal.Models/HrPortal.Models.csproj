@@ -9,4 +9,14 @@
   <ItemGroup>
     <ProjectReference Include="..\HrPortal.Shared\HrPortal.Shared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Extensions\" />
+    <None Remove="Identity\" />
+    <None Remove="Account\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Identity\" />
+    <Folder Include="Account\" />
+  </ItemGroup>
 </Project>
